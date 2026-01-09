@@ -1,0 +1,37 @@
+
+name: Java CI (Maven)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  javabuild:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'      # Popular OpenJDK distribution
+          java-version: '17'           # Use 17 or 21 for LTS
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build with Maven (downloads dependencies)
+        run: mvn -B -ntp clean package
+
+      - name: Run tests
+        run: mvn -B -ntp test
+
+      # Optional: Run your app (if it’s a CLI or service)
+      # - name: Run application
+      #   run: java -jar target/*.jar
